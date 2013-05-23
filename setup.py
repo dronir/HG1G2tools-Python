@@ -7,8 +7,8 @@ execfile('HG1G2tools/version.py')
 setup(
     name = 'HG1G2 tools',
     version = __version__,
-    description = 'TODO: Enter a description',
-    long_description = open('README.rst').read() + '\n\n' + open('HISTORY.rst').read(),
+    description = 'Implementation of the H,G1,G2 magnitude system in Python',
+    long_description = open('README.txt').read(),
     author = 'Olli Wilkman',
     author_email = 'olli.wilkman@iki.fi',
     url = 'TODO: Enter an URL',
