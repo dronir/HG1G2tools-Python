@@ -4,7 +4,9 @@
 
 from .piecewisefunctions import *
 from .spline import Spline
-from numpy import array, radians
+from .HG1G2conversions import *
+from numpy import array, radians, matrix, zeros
+from numpy.linalg import lstsq as solve_leastsq
 
 class Basis:
     """Container of basis functions for HG1G2 system."""
@@ -51,9 +53,33 @@ class Basis:
     def __call__(self, i, x):
         """Return value of the ith basis function at x."""
         return self.functions[i](x)
-    def fit_HG1G2(self, data, degrees=True):
+    def fit_HG1G2(self, data, weight=None, degrees=True):
         """Fit HG1G2 system to data using this basis."""
-        pass
+        Ndata = data.shape[0]
+        Ncols = data.shape[1]
+        Nfuncs = len(self.functions)
+        # Convert angles to radians if needed
+        if degrees:
+            xval = radians(data[:,0])
+        else:
+            xval = data[:,0]
+        yval = 10**(-0.4 * data[:,1])
+        if weight:
+            if isinstance(weight, Number):
+                errors = zeros(Ndata) + weight
+            else:
+                errors = weight
+        else:
+            errors = zeros(Ndata)+0.03
+        sigmas = yval * (10**(0.4*errors) - 1)
+        Amatrix = matrix(zeros((Ndata, Nfuncs)))
+        for i in xrange(Ndata):
+            for j in xrange(Nfuncs):
+                Amatrix[i,j] = self(j, xval[i]) / sigmas[i]
+        yval = 1/(10**(0.4*errors) - 1)
+        params = solve_leastsq(Amatrix, yval)
+        return a1a2a3_to_HG1G2(params[0])
+        
 
 def form_base(filename=None):
     """Return a basis object."""
