@@ -17,5 +17,6 @@ setup(
     ],
     classifiers = [
         'TODO: Add trove classifiers (http://pypi.python.org/pypi?%3Aaction=list_classifiers)'
-    ]
+    ],
+    license = "The MIT License"
 )
