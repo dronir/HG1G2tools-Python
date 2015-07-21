@@ -4,8 +4,9 @@
 from .piecewisefunctions import *
 from .spline import Spline
 from .HG1G2conversions import *
-from numpy import array, radians, matrix, zeros
+from numpy import array, radians, matrix, zeros, percentile, median
 from numpy.linalg import lstsq as solve_leastsq, inv
+from numpy.random import multivariate_normal as multinormal
 
 class Basis:
     """Container of basis functions for HG1G2 system."""
@@ -85,7 +86,7 @@ class Basis:
         params, residual, rank, s = solve_leastsq(Amatrix, yval)
         covMatrix = inv(Amatrix.T * Amatrix)
     
-        return a1a2a3_to_HG1G2(params)#, covMatrix
+        return a1a2a3_to_HG1G2(params), covMatrix
     
     def fit_HG12(self, data, weight=None, degrees=True):
         """Fit (H,G12) system to data using this basis."""
@@ -122,7 +123,39 @@ class Basis:
             if residual[0] < min_residual:
                 min_residual = residual[0]
                 best_params = params
-        return a1a2_to_HG12(best_params)#, covMatrix
+        return (a1a2_to_HG12(best_params), covMatrix)
+
+def simulate_errors(params, cov, N=100000):
+    """Return a parameter error estimate based on the covariance matrix."""
+    M = len(params)
+    if M == 3:
+        convert_from = HG1G2_to_a1a2a3
+        convert_to = a1a2a3_to_HG1G2
+    elif M == 2:
+        convert_from = HG12_to_a1a2
+        convert_to = a1a2_to_HG12
+    else:
+        raise ValueError("Parameter vector length {} (expected 2 or 3).".format(len(params)))
+    mean = convert_from(params)
+    sample = multinormal(mean, cov, size=N)
+    HGsample = array([convert_to(x) for x in sample])
+    res = zeros((8, M))
+    
+    res[0,0:M] = HGsample.mean(axis=0)
+    res[1,0:M] = median(HGsample, axis=0)
+    res[2,0:M] = percentile(HGsample, 0.13499, axis=0)
+    res[3,0:M] = percentile(HGsample, 2.27501, axis=0)
+    res[4,0:M] = percentile(HGsample, 15.8655, axis=0)
+    res[5,0:M] = percentile(HGsample, 84.1345, axis=0)
+    res[6,0:M] = percentile(HGsample, 97.725, axis=0)
+    res[7,0:M] = percentile(HGsample, 99.865, axis=0)
+    return res
+
+def sample_HG1G2(params, cov, N):
+    mean = HG1G2_to_a1a2a3(params)
+    sample = multinormal(mean, cov, size=N)
+    HGsample = array([a1a2a3_to_HG1G2(x) for x in sample])
+    return HGsample
 
 def form_base(filename=None):
     """Return a basis object."""
