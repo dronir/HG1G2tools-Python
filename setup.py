@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 execfile('HG1G2tools/version.py')
 
@@ -11,7 +14,7 @@ setup(
     long_description = open('README.txt').read(),
     author = 'Olli Wilkman',
     author_email = 'olli.wilkman@iki.fi',
-    url = 'TODO: Enter an URL',
+    url = 'https://wiki.helsinki.fi/display/PSR/HG1G2+tools',
     packages = [
         'HG1G2tools'
     ],
