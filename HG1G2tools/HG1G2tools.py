@@ -161,5 +161,10 @@ def form_base(filename=None):
     """Return a basis object."""
     return Basis(filename)
 
-def fit_HG1G2(basis):
-    pass
+def fit_HG1G2(data, weight=None, degrees=True):
+    B = Basis()
+    return B.fit_HG1G2(data=data, weight=weight, degrees=degrees)
+
+def fit_HG12(data, weight=None, degrees=True):
+    B = Basis()
+    return B.fit_HG12(data=data, weight=weight, degrees=degrees)
