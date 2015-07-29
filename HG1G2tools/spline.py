@@ -34,7 +34,7 @@ class Spline:
     def __call__(self, x):
         i = None
         for j in xrange(len(self.knots)-1):
-            if self.knots[j] < x and self.knots[j+1] > x:
+            if self.knots[j] <= x and self.knots[j+1] > x:
                 i = j
                 break
         if i==None:
